@@ -37,6 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -47,6 +53,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Allauth middleware
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'SPR.urls'
@@ -121,3 +130,30 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+LOGIN_REDIRECT_URL = '/'  # Redirect after login
+LOGOUT_REDIRECT_URL = '/'  # Redirect after logout
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'email',
+            'profile',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+    }
+}
