@@ -21,3 +21,25 @@ ENV/
 
 # macOS specific
 .DS_Store
+
+# Dependencias de Node.js
+node_modules/
+
+# Archivos de compilación
+build/
+dist/
+
+# Archivos de configuración local
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.out
+*.err

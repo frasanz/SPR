@@ -40,11 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'allauth',
+    'dj_rest_auth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_spectacular',
     'corsheaders',
 
@@ -149,7 +151,7 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-LOGIN_REDIRECT_URL = '/'  # Redirect after login
+LOGIN_REDIRECT_URL = 'http://localhost:3000/dashboard'  # Redirect after login
 LOGOUT_REDIRECT_URL = '/'  # Redirect after logout
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
@@ -171,6 +173,13 @@ SOCIALACCOUNT_PROVIDERS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',  # For session-based auth
+        #'rest_framework.authentication.TokenAuthentication',  # For token-based auth
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Default: Protect views
+    ],
 }
 
 CORS_ALLOWED_ORIGINS = [

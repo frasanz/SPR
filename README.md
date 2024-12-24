@@ -1,2 +1,0 @@
-# speech-record
-# First commit
