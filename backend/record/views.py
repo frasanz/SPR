@@ -54,5 +54,34 @@ class RandomPhraseView(APIView):
         serializer = PhraseSerializer(phrase)
 
         return Response(serializer.data)
+    
+
+class AddPhraseView(APIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = PhraseSerializer
+
+    @swagger_auto_schema(
+        operation_description="Add a new phrase.",
+        request_body=PhraseSerializer,
+        responses={
+            201: openapi.Response('Phrase added', PhraseSerializer),
+            400: 'Bad request.'
+        }
+    )
+
+    def post(self, request):
+        """
+        Agrega una nueva frase.
+        """
+        user = request.user
+        data = request.data
+        data['User'] = user.id
+        serializer = PhraseSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        
+        return Response(serializer.errors, status=400)
             
 

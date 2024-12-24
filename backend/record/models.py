@@ -20,7 +20,7 @@ class Phrase(models.Model):
     def __str__(self):
         return self.text[:50]
     
-class Recording(models.Model):
+class Speech(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     phrase = models.ForeignKey(Phrase, on_delete=models.CASCADE)
     audio = models.FileField(upload_to=user_recording_directory_path)
