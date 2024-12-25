@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from .models import Phrase
 from .serializers import PhraseSerializer
 
@@ -23,8 +25,8 @@ class PhraseListView(ListAPIView):
         """
         user = self.request.user  # Usuario autenticado
         if user.is_superuser:
-            return Phrase.objects.all()
-        return Phrase.objects.filter(User=user)
+            return Phrase.objects.all().order_by('created_at')
+        return Phrase.objects.filter(User=user).order_by('-created_at')
     
 
 class RandomPhraseView(APIView):
@@ -83,5 +85,36 @@ class AddPhraseView(APIView):
             return Response(serializer.data, status=201)
         
         return Response(serializer.errors, status=400)
+    
+class DeletePhraseView(APIView):
+    """
+    API to delete a phrase.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Delete a phrase by its ID if it belongs to the authenticated user.",
+        responses={
+            204: "Phrase deleted successfully.",
+            404: "Phrase not found.",
+            403: "You don't have permission to delete this phrase."
+        }
+    )
+    def delete(self, request, id):
+        """
+        Deletes a phrase if it belongs to the authenticated user.
+        """
+        try:
+            phrase = Phrase.objects.get(id=id)
+        except Phrase.DoesNotExist:
+            return Response({'detail': 'Phrase not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Ensure the phrase belongs to the user
+        if phrase.User != request.user:
+            raise PermissionDenied("You don't have permission to delete this phrase.")
+
+        phrase.delete()
+        return Response({'detail': 'Phrase deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
             
 
