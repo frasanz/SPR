@@ -89,9 +89,15 @@ const NewPhrase = ({
         <List>
           {currentPhrases.map((phrase) => (
             <React.Fragment key={phrase.id}>
-              <ListItem
+              <ListItem sx={{ paddingTop: 2, paddingBottom: 2 }}
                 secondaryAction={
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                     {phrase.done && (
+                <audio controls sx={{  marginTop: 2 }}>
+                    <source src={phrase.audio_url} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                </audio>
+            )}
                     {phrase.done ? (
                       <CheckCircleIcon color="success" />
                     ) : (

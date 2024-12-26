@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework import permissions
-from .views import PhraseListView, RandomPhraseView, AddPhraseView, DeletePhraseView
+from .views import PhraseListView, RandomPhraseView, AddPhraseView, DeletePhraseView, UploadAudioView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 
@@ -9,6 +9,7 @@ urlpatterns = [
     path('api/random-phrase/', RandomPhraseView.as_view(), name='random_phrase'),
     path('api/add-phrase/', AddPhraseView.as_view(), name='add_phrase'),
     path('api/delete-phrase/<int:id>/', DeletePhraseView.as_view(), name='delete_phrase'),
+    path('api/upload-audio/<int:id>/', UploadAudioView.as_view(), name='upload-audio'),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),

@@ -5,11 +5,18 @@ import {
   Box,
   Typography,
   Button,
+  IconButton,
   CircularProgress,
   List,
   ListItem,
   ListItemText,
+  duration,
 } from "@mui/material";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import UploadIcon from "@mui/icons-material/Upload";
 import axios from "../utils/axiosConfig";
 
 const Record = () => {
@@ -25,14 +32,17 @@ const Record = () => {
   // Fetch phrases from API
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/phrases/", { withCredentials: true })
+      .get("http://localhost:8000/api/random-phrase/", { withCredentials: true })
       .then((response) => {
         setPhrases(response.data);
         setLoadingPhrases(false);
+
+        console.log("Phrases:", response.data);
       })
       .catch((error) => {
-        console.error("Error fetching phrases:", error);
+        console.error("Error fetching random phrase:", error);
         setLoadingPhrases(false);
+        
       });
   }, []);
 
@@ -49,7 +59,7 @@ const Record = () => {
 
       const record = waveSurfer.registerPlugin(
         RecordPlugin.create({
-          renderRecordedAudio: false,
+          renderRecordedAudio: true,
           scrollingWaveform: false,
           continuousWaveform: true,
         })
@@ -108,9 +118,6 @@ const Record = () => {
 
   const handlePlayPause = () => {
     if (!waveSurferInstance || !recordedAudio) return;
-
-    
-
     if (playing) {
       waveSurferInstance.pause();
     } else {
@@ -120,46 +127,122 @@ const Record = () => {
     setPlaying(!playing);
   };
 
-  return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Record Your Voice
-      </Typography>
+  const handleUploadAudio = async () => {
+    if (!recordedAudio) {
+      alert("No audio to upload!");
+      return;
+    }
+  
+    let audioBlob;
+    console.log(typeof recordedAudio)
+  
+   
+    try {
+    const response = await fetch(recordedAudio); // Fetch the audio file from its URL
+        audioBlob = await response.blob(); // Convert to Blob
+      } catch (error) {
+        console.error("Error fetching audio URL:", error);
+        alert("Failed to prepare audio for upload.");
+        return;
+      }
+   
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "recording.wav");
+  
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/upload-audio/${phrases.id}/`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      alert(`Audio uploaded successfully: ${response.data.file_url}`);
+    // Fetch a new phrase after successful upload
+    setLoadingPhrases(true);
+    axios
+      .get("http://localhost:8000/api/random-phrase/", { withCredentials: true })
+      .then((response) => {
+        setPhrases(response.data);
+        setLoadingPhrases(false);
+        setRecordedAudio(null);
+        waveSurferInstance.empty();
+      })
+      .catch((error) => {
+        console.error("Error fetching random phrase:", error);
+        setLoadingPhrases(false);
+      });
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+      alert("Failed to upload audio.");
+    }
+  };
+  
 
-      <Box ref={waveformRef} sx={{ border: "1px solid #ddd", margin: "1rem 0" }} />
+  const handleSpeakPhrase = () => {
+    if ("speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(phrases.text);
+      utterance.lang = "es-ES"; // Set the language if needed
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.error("Text-to-Speech is not supported in this browser.");
+    }
+  };
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleRecord}
-        disabled={playing}
-        sx={{ marginBottom: 2, marginRight: 2 }}
-      >
-        {recording ? "Stop Recording" : "Start Recording"}
-      </Button>
-      <Button
-          variant="contained"
-          color="secondary"
-          onClick={handlePlayPause}
-          sx = {{ marginBottom: 2 }}
-          disabled={!recordedAudio || recording}
-        >
-          {playing ? "Pause Playback" : "Play Recording"}
-        </Button>
+return (
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <Typography variant="h4" gutterBottom>
+            Graba tu voz
+        </Typography>
+        {loadingPhrases ? (
+            <CircularProgress />
+        ) : (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="h6" gutterBottom>
+                    {phrases.text}
+                </Typography>
+                <IconButton onClick={handleSpeakPhrase} aria-label="speak phrase">
+                    <VolumeUpIcon />
+                </IconButton>
+            </Box>
+        )}
 
-      {loadingPhrases ? (
-        <CircularProgress />
-      ) : (
-        <List>
-          {phrases.map((phrase) => (
-            <ListItem key={phrase.id}>
-              <ListItemText primary={phrase.text} />
-            </ListItem>
-          ))}
-        </List>
-      )}
+        <Box ref={waveformRef} sx={{ border: "1px solid #ddd", margin: "1rem 0", height: "100px", width: "100%" }} />
+
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handleRecord}
+                disabled={playing}
+                startIcon={<RecordVoiceOverIcon />}
+            >
+                {recording ? "Stop Recording" : "Start Recording"}
+            </Button>
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={handlePlayPause}
+                disabled={!recordedAudio || recording}
+                startIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
+            >
+                {playing ? "Pause Playback" : "Play Recording"}
+            </Button>
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={handleUploadAudio}
+                startIcon={<UploadIcon />}
+                disabled={!recordedAudio || recording}
+            >
+                Upload
+            </Button>
+        </Box>
     </Box>
-  );
+);
 };
 
 export default Record;
