@@ -31,32 +31,45 @@ class PhraseListView(ListAPIView):
     
 
 class RandomPhraseView(APIView):
-
     permission_classes = [IsAuthenticated]
     serializer_class = PhraseSerializer
 
     @swagger_auto_schema(
         operation_description="Get a random unrecorded phrase.",
         responses={
-            200: openapi.Response('Random prase', PhraseSerializer),
-            404: 'There are not pending phrases.'
+            200: openapi.Response('Random phrase', PhraseSerializer),
+            404: 'There are no pending phrases.'
         }
     )
-
     def get(self, request):
         """
-        Obtiene una frase aleatoria.
+        Obtiene una frase aleatoria junto con estadísticas.
         """
         user = request.user
 
+        # Fetch all phrases and phrases marked as done
+        total_phrases = Phrase.objects.filter(User=user).count()
+        done_phrases = Phrase.objects.filter(User=user, done=True).count()
+
+        # Filter not done phrases
         not_done_phrases = Phrase.objects.filter(User=user, done=False)
         if not not_done_phrases.exists():
-            return Response({'detail': 'No hay frases por hacer.'}, status=404)
-        
+            return Response({
+                'detail': 'No hay frases por hacer.',
+                'total_phrases': total_phrases,
+                'done_phrases': done_phrases
+            }, status=404)
+
+        # Randomly select one not done phrase
         phrase = not_done_phrases.order_by('?').first()
         serializer = PhraseSerializer(phrase)
 
-        return Response(serializer.data)
+        # Add statistics to the response
+        return Response({
+            'phrase': serializer.data,
+            'total_phrases': total_phrases,
+            'done_phrases': done_phrases
+        })
     
 
 class AddPhraseView(APIView):
@@ -81,6 +94,36 @@ class AddPhraseView(APIView):
         data = request.data
         data['User'] = user.id
         serializer = PhraseSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        
+        return Response(serializer.errors, status=400)
+    
+class AddMultiplePhrasesView(APIView):
+    
+    permission_classes = [IsAuthenticated]
+    serializer_class = PhraseSerializer
+
+    @swagger_auto_schema(
+        operation_description="Add multiple phrases.",
+        request_body=PhraseSerializer(many=True),
+        responses={
+            201: 'Phrases added.',
+            400: 'Bad request.'
+        }
+    )
+
+    def post(self, request):
+        """
+        Agrega varias frases.
+        """
+        user = request.user
+        data = request.data
+        for phrase in data:
+            phrase['User'] = user.id
+
+        serializer = PhraseSerializer(data=data, many=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo, useEffect } from "react";
+import React, { useRef, useState, useMemo, useEffect, use } from "react";
 import WaveSurfer from "wavesurfer.js";
 import RecordPlugin from "wavesurfer.js/dist/plugins/record.esm.js";
 import {
@@ -21,7 +21,10 @@ import axios from "../utils/axiosConfig";
 
 const Record = () => {
   const waveformRef = useRef(null); // Ref for the waveform container
-  const [phrases, setPhrases] = useState([]); // Phrases from the API
+  const [phrases, setPhrases] = useState({}); // Phrases from the API
+  const phrasesRef = useRef(phrases); // Ref for phrases
+  const [totalPhrases, setTotalPhrases] = useState(0); // Total phrases
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0); // Current phrase index
   const [loadingPhrases, setLoadingPhrases] = useState(true); // Loading state
   const [waveSurferInstance, setWaveSurferInstance] = useState(null); // WaveSurfer instance
   const [recordPlugin, setRecordPlugin] = useState(null); // Record plugin instance
@@ -29,12 +32,20 @@ const Record = () => {
   const [recordedAudio, setRecordedAudio] = useState(null);
   const [playing, setPlaying] = useState(false);
 
+
+
+  useEffect(() => {
+    phrasesRef.current = phrases;
+  }, [phrases]);
   // Fetch phrases from API
   useEffect(() => {
     axios
       .get("http://localhost:8000/api/random-phrase/", { withCredentials: true })
       .then((response) => {
-        setPhrases(response.data);
+        console.log("Response:", response.data.phrase);
+        setPhrases(response.data.phrase);
+        setCurrentPhraseIndex(response.data.done_phrases+1);
+        setTotalPhrases(response.data.total_phrases);
         setLoadingPhrases(false);
 
         console.log("Phrases:", response.data);
@@ -166,7 +177,10 @@ const Record = () => {
     axios
       .get("http://localhost:8000/api/random-phrase/", { withCredentials: true })
       .then((response) => {
-        setPhrases(response.data);
+        console.log("Response:", response.data.phrase);
+        setPhrases(response.data.phrase);
+        setCurrentPhraseIndex(response.data.done_phrases+1);
+        setTotalPhrases(response.data.total_phrases);
         setLoadingPhrases(false);
         setRecordedAudio(null);
         waveSurferInstance.empty();
@@ -184,65 +198,99 @@ const Record = () => {
 
   const handleSpeakPhrase = () => {
     if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(phrases.text);
+      console.log("Speaking phrase:", phrasesRef.current.text);
+      const utterance = new SpeechSynthesisUtterance(phrasesRef.current.text);
       utterance.lang = "es-ES"; // Set the language if needed
+      utterance.rate = 0.50; // Adjust the rate to slow down the speech
       window.speechSynthesis.speak(utterance);
     } else {
       console.error("Text-to-Speech is not supported in this browser.");
     }
   };
 
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      console.log("Key pressed:", event.key);
+  
+      if (event.key === "e") {
+        console.log("Speaking phrase...");
+        handleSpeakPhrase();
+      }
+  
+      if (event.key === " ") { // Space key for recording
+        event.preventDefault(); // Prevent default behavior (e.g., page scrolling)
+        console.log("Toggling recording...");
+        handleRecord();
+      }
+  
+      if (event.key === "p") { // "p" key for play/pause
+        console.log("Toggling play/pause...");
+        handlePlayPause();
+      }
+  
+      if (event.key === "u") { // "u" key for upload
+        console.log("Uploading audio...");
+        handleUploadAudio();
+      }
+    };
+  
+    window.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [handleSpeakPhrase, handleRecord, handlePlayPause, handleUploadAudio]);
+
 return (
-    <Box sx={{ p: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <Typography variant="h4" gutterBottom>
-            Graba tu voz
+  <Box sx={{ p: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Typography variant="h4" gutterBottom>
+      Graba tu voz
+    </Typography>
+    {loadingPhrases ? (
+      <CircularProgress />
+    ) : (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Typography variant="h6" gutterBottom>
+          ({currentPhraseIndex}/{totalPhrases}) {phrases.text}
         </Typography>
-        {loadingPhrases ? (
-            <CircularProgress />
-        ) : (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography variant="h6" gutterBottom>
-                    {phrases.text}
-                </Typography>
-                <IconButton onClick={handleSpeakPhrase} aria-label="speak phrase">
-                    <VolumeUpIcon />
-                </IconButton>
-            </Box>
-        )}
+        <IconButton onClick={handleSpeakPhrase} aria-label="speak phrase">
+          <VolumeUpIcon />
+        </IconButton>
+      </Box>
+    )}
 
-        <Box ref={waveformRef} sx={{ border: "1px solid #ddd", margin: "1rem 0", height: "100px", width: "100%" }} />
+    <Box ref={waveformRef} sx={{ border: "1px solid #ddd", margin: "1rem 0", height: "100px", width: "100%" }} />
 
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
-            <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleRecord}
-                disabled={playing}
-                startIcon={<RecordVoiceOverIcon />}
-            >
-                {recording ? "Stop Recording" : "Start Recording"}
-            </Button>
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handlePlayPause}
-                disabled={!recordedAudio || recording}
-                startIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
-            >
-                {playing ? "Pause Playback" : "Play Recording"}
-            </Button>
+    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={handleRecord}
+        disabled={playing}
+        startIcon={<RecordVoiceOverIcon />}
+      >
+        {recording ? "Stop Recording" : "Start Recording"}
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handlePlayPause}
+        disabled={!recordedAudio || recording}
+        startIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
+      >
+        {playing ? "Pause Playback" : "Play Recording"}
+      </Button>
 
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handleUploadAudio}
-                startIcon={<UploadIcon />}
-                disabled={!recordedAudio || recording}
-            >
-                Upload
-            </Button>
-        </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleUploadAudio}
+        startIcon={<UploadIcon />}
+        disabled={!recordedAudio || recording}
+      >
+        Upload
+      </Button>
     </Box>
+  </Box>
 );
 };
 

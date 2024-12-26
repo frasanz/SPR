@@ -7,6 +7,7 @@ import { Box, CssBaseline, Drawer, List, ListItemText, ListItemButton, Toolbar, 
 import Overview from "./Overview";
 import NewPhrase from "./NewPhrase";
 import Record from "./Record";
+import MultiplePhraseSubmit from "./MultiplePhraseSubmit";
 
 const drawerWidth = 240;
 
@@ -119,6 +120,9 @@ const Dashboard = () => {
             <ListItemButton component={Link} to="/dashboard/record">
               <ListItemText primary="Record" />
             </ListItemButton>
+            <ListItemButton component={Link} to="/dashboard/multiple-phrase-submit">
+              <ListItemText primary="Multiple Phrases" />
+            </ListItemButton>
           </List>
         </Box>
       </Drawer>
@@ -150,6 +154,7 @@ const Dashboard = () => {
           />
           <Route path="record" element={<Record />} />
           <Route path="*" element={<Navigate to="overview" replace />} />
+          <Route path="multiple-phrase-submit" element={<MultiplePhraseSubmit />} />
         </Routes>
       </Box>
     </Box>

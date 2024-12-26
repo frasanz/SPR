@@ -32,7 +32,7 @@ const NewPhrase = ({
 }) => {
     const [filter, setFilter] = useState("all"); // State for filtering
     const [currentPage, setCurrentPage] = useState(1); // Current page
-    const phrasesPerPage = 5; // Number of phrases per page
+    const phrasesPerPage = 10; // Number of phrases per page
 
     const filteredPhrases = phrases.filter((phrase) => {
         if (filter === "done") return phrase.done;
@@ -111,13 +111,19 @@ const NewPhrase = ({
                                         <Checkbox
                                             checked={phrase.is_valid}
                                             onChange={() => handleUpdatePhrase(phrase.id, { is_valid: !phrase.is_valid })}
+                                            sx={{ cursor: phrase.done ? "pointer" : "not-allowed"  }}
                                             icon={<RemoveDoneIcon />}
-                                            checkedIcon={<DoneAllIcon />}
+                                            checkedIcon={<CheckCircleIcon />}
+                                            title={phrase.is_valid ? "Mark as not validated" : "Mark as validated"}
+                                            disabled = {!phrase.done}
+                                            
                                         />
                                         <MicExternalOffIcon
-                                            color="error"
-                                            sx={{ cursor: "pointer" }}
-                                            onClick={() => handleDeletePhrase(phrase.id)}
+                                            color={phrase.done ? "error" : "disabled"}
+                                            sx={{ cursor: phrase.done ? "pointer" : "not-allowed"  }}
+                                            onClick={ phrase.done ? () => handleUpdatePhrase(phrase.id, { done: !phrase.done , is_valid: false }) : undefined}
+                                            title = {phrase.done ? "Delete audio" : "Phrase not done"}
+                                            disabled = {phrase.done}
                                         />
                                         
 
@@ -125,6 +131,7 @@ const NewPhrase = ({
                                             color="error"
                                             sx={{ cursor: "pointer" }}
                                             onClick={() => handleDeletePhrase(phrase.id)}
+                                            title="Delete phrase"
                                         />
                                     </Box>
                                 }
