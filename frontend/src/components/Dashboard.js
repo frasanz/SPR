@@ -65,6 +65,31 @@ const Dashboard = () => {
       });
   };
 
+  const handleUpdatePhrase = async (id, updatedFields) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/api/partial-update-phrase/${id}/`,
+        updatedFields, // Only send the fields to update
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, // Include cookies if required
+        }
+      );
+      console.log("Phrase updated successfully:", response.data);
+      setPhrases((prevPhrases) =>
+        prevPhrases.map((phrase) =>
+            phrase.id === id ? { ...phrase, ...response.data } : phrase
+        )
+    );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating phrase:", error.response?.data || error);
+      alert("Failed to update phrase.");
+    }
+  };
+
   if (loading) return <CircularProgress />;
   if (!user) return <Navigate to="/" />;
 
@@ -119,6 +144,7 @@ const Dashboard = () => {
                 setNewPhrase={setNewPhrase}
                 handleAddPhrase={handleAddPhrase}
                 handleDeletePhrase={handleDeletePhrase}
+                handleUpdatePhrase={handleUpdatePhrase}
               />
             }
           />

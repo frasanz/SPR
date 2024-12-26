@@ -117,6 +117,40 @@ class DeletePhraseView(APIView):
         phrase.delete()
         return Response({'detail': 'Phrase deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
 
+
+class PartialUpdatePhraseView(APIView):
+    """
+    API to update a phrase partially.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Update a phrase partially by its ID if it belongs to the authenticated user.",
+        responses={
+            200: "Phrase updated successfully.",
+            404: "Phrase not found.",
+            403: "You don't have permission to update this phrase."
+        }
+    )
+    def patch(self, request, id):
+        """
+        Updates a phrase partially if it belongs to the authenticated user.
+        """
+        try:
+            phrase = Phrase.objects.get(id=id)
+        except Phrase.DoesNotExist:
+            return Response({'detail': 'Phrase not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Ensure the phrase belongs to the user
+        if phrase.User != request.user:
+            raise PermissionDenied("You don't have permission to update this phrase.")
+
+        serializer = PhraseSerializer(instance=phrase, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 
 class UploadAudioView(APIView):

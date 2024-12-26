@@ -215,7 +215,7 @@ return (
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
             <Button
                 variant="contained"
-                color="primary"
+                color="secondary"
                 onClick={handleRecord}
                 disabled={playing}
                 startIcon={<RecordVoiceOverIcon />}
@@ -224,13 +224,14 @@ return (
             </Button>
             <Button
                 variant="contained"
-                color="secondary"
+                color="primary"
                 onClick={handlePlayPause}
                 disabled={!recordedAudio || recording}
                 startIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
             >
                 {playing ? "Pause Playback" : "Play Recording"}
             </Button>
+
             <Button
                 variant="contained"
                 color="primary"
