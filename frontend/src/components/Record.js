@@ -6,11 +6,8 @@ import {
   Typography,
   Button,
   IconButton,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
-  duration,
+  LinearProgress,
+  Paper,
 } from "@mui/material";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
@@ -240,58 +237,114 @@ const Record = () => {
     };
   }, [handleSpeakPhrase, handleRecord, handlePlayPause, handleUploadAudio]);
 
-return (
-  <Box sx={{ p: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
-    <Typography variant="h4" gutterBottom>
-      Graba tu voz
-    </Typography>
-    {loadingPhrases ? (
-      <CircularProgress />
-    ) : (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          ({currentPhraseIndex}/{totalPhrases}) {phrases.text}
+  return (
+    <Box
+      sx={{
+        textAlign: "center",
+        padding: "20px",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      {/* Header */}
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ fontWeight: "bold", color: "#4a4a4a", mb: 2 }}
+      >
+        🎤 Graba tu voz
+      </Typography>
+
+      {/* Progress bar and count */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="body1" sx={{ color: "#6a6a6a", mb: 1 }}>
+          Frases completadas:
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={(currentPhraseIndex / totalPhrases) * 100}
+          sx={{
+            width: "50%",
+            margin: "auto",
+            height: "10px",
+            borderRadius: "5px",
+          }}
+        />
+        <Typography variant="body2" sx={{ mt: 1, color: "#4a4a4a" }}>
+          {currentPhraseIndex} / {totalPhrases}
+        </Typography>
+      </Box>
+
+      {/* Current phrase */}
+      <Paper
+        elevation={3}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          padding: "20px",
+          marginBottom: "20px",
+          maxWidth: "600px",
+          margin: "auto",
+          borderRadius: "10px",
+          mb: 4,
+        }}
+      >
+        <Typography variant="h6" sx={{ fontSize: "1.5rem", mb: 2 }}>
+          {phrases.text}
         </Typography>
         <IconButton onClick={handleSpeakPhrase} aria-label="speak phrase">
-          <VolumeUpIcon />
+          <VolumeUpIcon fontSize="large" />
         </IconButton>
+      </Paper>
+      <Box ref={waveformRef} sx={{ border: "1px solid #ddd", margin: "1rem 0", height: "100px", width: "100%" }} />
+
+
+
+      {/* Buttons */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "15px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Record Button */}
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleRecord}
+          disabled={playing} // Disabled if playing
+          startIcon={<RecordVoiceOverIcon />}
+        >
+          {recording ? "STOP RECORDING" : "START RECORDING"}
+        </Button>
+
+        {/* Play Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handlePlayPause}
+          disabled={!recordedAudio || recording} // Disabled if not recording
+          startIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
+        >
+          {playing ? "PAUSE RECORDING" : "PLAY RECORDING"}
+        </Button>
+
+        {/* Upload Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleUploadAudio}
+          disabled={!recordedAudio || recording} // Disabled if no recording is done
+          startIcon={<UploadIcon />}
+        >
+          UPLOAD
+        </Button>
       </Box>
-    )}
-
-    <Box ref={waveformRef} sx={{ border: "1px solid #ddd", margin: "1rem 0", height: "100px", width: "100%" }} />
-
-    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={handleRecord}
-        disabled={playing}
-        startIcon={<RecordVoiceOverIcon />}
-      >
-        {recording ? "Stop Recording" : "Start Recording"}
-      </Button>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handlePlayPause}
-        disabled={!recordedAudio || recording}
-        startIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
-      >
-        {playing ? "Pause Playback" : "Play Recording"}
-      </Button>
-
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleUploadAudio}
-        startIcon={<UploadIcon />}
-        disabled={!recordedAudio || recording}
-      >
-        Upload
-      </Button>
     </Box>
-  </Box>
-);
+  );
 };
 
 export default Record;
