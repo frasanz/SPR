@@ -3,34 +3,43 @@ import { Typography, Box } from "@mui/material";
 
 const Overview = () => {
   return (
-    <Box sx={{  }}>
+    <Box sx={{ padding: 2 }}>
       <Typography variant="h4" gutterBottom>
         Dashboard Overview
       </Typography>
-      <Typography variant="body1">
-        Welcome to your dashboard! Here’s what you can do:
+      <Typography variant="body1" sx={{ mb: 2 }}>
+        Speech Record es una aplicación para grabar audios asociados a frases personalizadas. Estos audios pueden usarse para entrenar una inteligencia artificial (como Whisper) en reconocimiento del habla. Cada usuario puede gestionar frases según sus necesidades.
+      </Typography>
+      <Typography variant="h5" gutterBottom>
+        Funcionalidades
       </Typography>
       <Box sx={{ mt: 2 }}>
         <ul>
           <li>
             <Typography variant="body1">
-              View and manage your phrases in the <strong>New Phrase</strong> section.
+              <strong>List:</strong> Permite ver el estado de cada frase, añadir o borrar frases y audios asociados, y validarlas. También puedes gestionar las frases existentes de manera sencilla.
             </Typography>
           </li>
           <li>
             <Typography variant="body1">
-              Record your voice for specific phrases in the <strong>Record</strong> section.
+              <strong>Record:</strong> Graba audios asociados a cada frase. Usa el ratón o los atajos de teclado:
+              <ul>
+                <li><strong>E:</strong> Escuchar la frase.</li>
+                <li><strong>Espacio:</strong> Iniciar y parar la grabación.</li>
+                <li><strong>P:</strong> Reproducir la grabación.</li>
+                <li><strong>U:</strong> Subir la grabación al servidor y pasar a la siguiente frase.</li>
+              </ul>
             </Typography>
           </li>
           <li>
             <Typography variant="body1">
-              Use the filters and pagination to customize your experience.
+              <strong>Add Multiple Phrases:</strong> Permite añadir múltiples frases a la vez usando un archivo JSON. En esta sección encontrarás un ejemplo para guiarte.
             </Typography>
           </li>
         </ul>
       </Box>
       <Typography variant="body1" sx={{ mt: 2 }}>
-        This dashboard is designed to help you efficiently manage your tasks and track your progress. Explore the options in the menu to get started!
+        Este dashboard está desarrollado con React y diseñado para que gestiones tus tareas de forma eficiente y hagas un seguimiento del progreso. Explora las opciones en el menú para empezar.
       </Typography>
     </Box>
   );
