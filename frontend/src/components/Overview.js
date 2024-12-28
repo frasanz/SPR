@@ -3,7 +3,7 @@ import { Typography, Box } from "@mui/material";
 
 const Overview = () => {
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{  }}>
       <Typography variant="h4" gutterBottom>
         Dashboard Overview
       </Typography>

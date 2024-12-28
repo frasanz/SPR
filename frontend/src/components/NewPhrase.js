@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
+import { AuthContext } from "../AuthContext";
 import {
     Box,
     Typography,
@@ -21,18 +22,23 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import MicExternalOffIcon from '@mui/icons-material/MicExternalOff';
 import axios from "axios";
 
+
 const NewPhrase = ({
     phrases,
     loadingPhrases,
+    setPhrases,
+    setLoadingPhrases,
     newPhrase,
     setNewPhrase,
     handleAddPhrase,
     handleDeletePhrase,
     handleUpdatePhrase,
+    handleClick,
 }) => {
     const [filter, setFilter] = useState("all"); // State for filtering
     const [currentPage, setCurrentPage] = useState(1); // Current page
-    const phrasesPerPage = 10; // Number of phrases per page
+    const { user, loading } = useContext(AuthContext);
+    const phrasesPerPage = 5; // Number of phrases per page
 
     const filteredPhrases = phrases.filter((phrase) => {
         if (filter === "done") return phrase.done;
@@ -50,6 +56,22 @@ const NewPhrase = ({
         indexOfLastPhrase
     );
 
+      // Fetch phrases when user is authenticated
+  useEffect(() => {
+    if (user) {
+      axios
+        .get("/phrases/", { withCredentials: true })
+        .then((response) => {
+          setPhrases(response.data);
+          setLoadingPhrases(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching phrases:", error);
+          setLoadingPhrases(false);
+        });
+    }
+  }, [user]);
+
     const handleFilterChange = (event) => {
         setFilter(event.target.value);
         setCurrentPage(1); // Reset to the first page
@@ -65,21 +87,10 @@ const NewPhrase = ({
 
     return (
         <>
-            <Typography variant="h5" sx={{ mt: 4 }}>
-                Add a New Phrase
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                <TextField
-                    label="Enter a new phrase"
-                    variant="outlined"
-                    fullWidth
-                    value={newPhrase}
-                    onChange={(e) => setNewPhrase(e.target.value)}
-                />
-                <Button variant="contained" color="primary" onClick={handleAddPhrase}>
-                    Add
-                </Button>
-            </Box>
+             <Typography variant="h4" gutterBottom>
+                    List of Phrases
+                  </Typography>
+           
 
             <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
                 <Typography>Filter:</Typography>
@@ -91,8 +102,6 @@ const NewPhrase = ({
                     <MenuItem value="notValidated">Not Validated</MenuItem>
                 </Select>
             </Box>
-
-            <Typography variant="h5">Your Phrases</Typography>
             {loadingPhrases ? (
                 <CircularProgress />
             ) : currentPhrases.length > 0 ? (
@@ -168,6 +177,21 @@ const NewPhrase = ({
                     onClick={handleNextPage}
                 >
                     Next
+                </Button>
+            </Box>
+            <Typography variant="h5" sx={{mt: 3}}>
+                Add a New Phrase
+            </Typography>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                <TextField
+                    label="Enter a new phrase"
+                    variant="outlined"
+                    fullWidth
+                    value={newPhrase}
+                    onChange={(e) => setNewPhrase(e.target.value)}
+                />
+                <Button variant="contained" color="primary" onClick={handleAddPhrase}>
+                    Add
                 </Button>
             </Box>
         </>

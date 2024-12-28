@@ -16,7 +16,10 @@ import PauseIcon from "@mui/icons-material/Pause";
 import UploadIcon from "@mui/icons-material/Upload";
 import axios from "../utils/axiosConfig";
 
-const Record = () => {
+
+const Record = ({
+  handleClick,
+}) => {
   const waveformRef = useRef(null); // Ref for the waveform container
   const [phrases, setPhrases] = useState({}); // Phrases from the API
   const phrasesRef = useRef(phrases); // Ref for phrases
@@ -37,7 +40,7 @@ const Record = () => {
   // Fetch phrases from API
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/random-phrase/", { withCredentials: true })
+      .get("/random-phrase/", { withCredentials: true })
       .then((response) => {
         console.log("Response:", response.data.phrase);
         setPhrases(response.data.phrase);
@@ -159,7 +162,7 @@ const Record = () => {
   
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/upload-audio/${phrases.id}/`,
+        `/upload-audio/${phrases.id}/`,
         formData,
         {
           withCredentials: true,
@@ -168,11 +171,11 @@ const Record = () => {
           },
         }
       );
-      alert(`Audio uploaded successfully: ${response.data.file_url}`);
+      handleClick("Audio subido correctamente");
     // Fetch a new phrase after successful upload
     setLoadingPhrases(true);
     axios
-      .get("http://localhost:8000/api/random-phrase/", { withCredentials: true })
+      .get("/random-phrase/", { withCredentials: true })
       .then((response) => {
         console.log("Response:", response.data.phrase);
         setPhrases(response.data.phrase);

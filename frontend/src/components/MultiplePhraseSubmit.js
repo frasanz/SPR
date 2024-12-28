@@ -28,9 +28,9 @@ const MultiplePhraseSubmit = () => {
     };
 
     return (
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{}}>
             <Typography variant="h5" sx={{ mb: 2 }}>
-                Submit JSON
+                You can submit multiple phrases at once using JSON.
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
@@ -51,6 +51,17 @@ const MultiplePhraseSubmit = () => {
                 >
                     Submit JSON
                 </Button>
+                <Box sx={{ mt: 2, p: 2, border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#f9f9f9" }}>
+                    <Typography variant="body1">
+                        Example JSON:
+                    </Typography>
+                    <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap" }}>
+                        {`[
+    {"text": "This is phrase 1"},
+    {"text": "This is phrase 2"}
+]`}
+                    </Typography>
+                </Box>
             </Box>
         </Box>
     );
