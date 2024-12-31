@@ -46,7 +46,7 @@ const Dashboard = () => {
     }
     axios
       .post(
-        "http://add-phrase/",
+        "/add-phrase/",
         { text: newPhrase },
         { withCredentials: true }
       )

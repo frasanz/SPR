@@ -45,6 +45,7 @@ const NewPhrase = ({
         if (filter === "notDone") return !phrase.done;
         if (filter === "validated") return phrase.is_valid;
         if (filter === "notValidated") return !phrase.is_valid;
+        if (filter === "doneNotValidated") return phrase.done && !phrase.is_valid;
         return true;
     });
 
@@ -96,10 +97,11 @@ const NewPhrase = ({
                 <Typography>Filter:</Typography>
                 <Select value={filter} onChange={handleFilterChange}>
                     <MenuItem value="all">All</MenuItem>
+                    <MenuItem value="doneNotValidated">Done & not validated</MenuItem>
                     <MenuItem value="done">Done</MenuItem>
-                    <MenuItem value="notDone">Not Done</MenuItem>
+                    <MenuItem value="notDone">Not done</MenuItem>
                     <MenuItem value="validated">Validated</MenuItem>
-                    <MenuItem value="notValidated">Not Validated</MenuItem>
+                    <MenuItem value="notValidated">Not validated</MenuItem>
                 </Select>
             </Box>
             {loadingPhrases ? (
@@ -113,7 +115,7 @@ const NewPhrase = ({
                                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                         {phrase.done && (
                                             <audio controls sx={{ marginTop: 2 }}>
-                                                <source src={phrase.audio_url} type="audio/mpeg" />
+                                                <source src={`http://localhost:8000/api/audio/${phrase.id}/`} type="audio/mpeg" />
                                                 Your browser does not support the audio element.
                                             </audio>
                                         )}

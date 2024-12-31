@@ -302,8 +302,6 @@ const Record = ({
       </Paper>
       <Box ref={waveformRef} sx={{ border: "1px solid #ddd", margin: "1rem 0", height: "100px", width: "100%" }} />
 
-
-
       {/* Buttons */}
       <Box
         sx={{
@@ -345,6 +343,20 @@ const Record = ({
         >
           UPLOAD
         </Button>
+      </Box>
+      <Box>
+        <Typography variant="body1" sx={{ mt: 2, color: "#4a4a4a" }}>
+          E: Escuchar la frase.
+        </Typography>
+        <Typography variant="body1" sx={{ mt: 1, color: "#4a4a4a" }}>
+          Espacio: Iniciar y parar la grabación.
+        </Typography>
+        <Typography variant="body1" sx={{ mt: 1, color: "#4a4a4a" }}>
+          P: Reproducir la grabación.
+        </Typography>
+        <Typography variant="body1" sx={{ mt: 1, color: "#4a4a4a" }}>
+          U: Subir la grabación al servidor y pasar a la siguiente frase.
+        </Typography>
       </Box>
     </Box>
   );

@@ -10,6 +10,11 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from .models import Phrase
 from .serializers import PhraseSerializer, AudioUploadSerializer
+from django.http import HttpResponse, HttpResponseForbidden, Http404
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
+from .models import Phrase
 
 # Create your views here.
 class PhraseListView(ListAPIView):
@@ -223,6 +228,53 @@ class UploadAudioView(APIView):
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+class ServeAudioView(APIView):
+    """
+    View to serve audio files only to authorized users.
+    """
+    def get(self, request, pk):
+        # Obtén la frase asociada al ID
+        phrase = get_object_or_404(Phrase, pk=pk)
+        print(phrase)
+        # Verifica si el usuario autenticado es el propietario
+        if phrase.User != request.user:
+            return HttpResponseForbidden("You are not allowed to access this file.")
+
+        # Verifica si el archivo de audio existe
+        if not phrase.audio:
+            return Http404("Audio file not found.")
+
+        file_path = os.path.join(settings.MEDIA_RECORD, str(phrase.audio))
+        print(phrase.audio)
+        print(file_path)
+        if not os.path.exists(file_path):
+            return Http404("Audio file does not exist on the server.")
+
+        # Sirve el archivo
+        with open(file_path, 'rb') as audio_file:
+            response = HttpResponse(audio_file.read(), content_type="audio/mpeg")
+            
+            response['Content-Disposition'] = f'inline; filename="{os.path.basename(file_path)}"'
+            return response
 
             
 
+class PhraseStatsView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        username = request.user.username
+        user_phrases_count = Phrase.objects.filter(User=request.user).count()
+        validated_phrases_count = Phrase.objects.filter(User=request.user, is_valid=True).count()
+        done_phrases_count = Phrase.objects.filter(User=request.user, done=True).count()
+
+        stats = {
+            "username": username,
+            "name": request.user.get_full_name(),
+            "total_phrases": user_phrases_count,
+            "validated_phrases": validated_phrases_count,
+            "done_phrases": done_phrases_count,
+        }
+        return Response(stats)
