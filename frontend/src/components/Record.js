@@ -138,63 +138,66 @@ const Record = ({
     setPlaying(!playing);
   };
 
-  const handleUploadAudio = async () => {
-    if (!recordedAudio) {
-      alert("No audio to upload!");
-      return;
-    }
-  
-    let audioBlob;
-    console.log(typeof recordedAudio)
-  
-   
-    try {
+ const handleUploadAudio = async () => {
+  if (!recordedAudio) {
+    alert("No audio to upload!");
+    return;
+  }
+
+  let audioBlob;
+  try {
+    console.log("Fetching recorded audio URL...");
     const response = await fetch(recordedAudio); // Fetch the audio file from its URL
-        audioBlob = await response.blob(); // Convert to Blob
-      } catch (error) {
-        console.error("Error fetching audio URL:", error);
-        alert("Failed to prepare audio for upload.");
-        return;
+    audioBlob = await response.blob(); // Convert to Blob
+    console.log("Audio blob prepared:", audioBlob);
+  } catch (error) {
+    console.error("Error fetching audio URL or converting to Blob:", error);
+    alert("Failed to prepare audio for upload.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "recording.wav");
+
+  try {
+    console.log("Uploading audio...");
+    const response = await axios.post(
+      `/upload-audio/${phrases.id}/`,
+      formData,
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       }
-   
-    const formData = new FormData();
-    formData.append("audio", audioBlob, "recording.wav");
-  
-    try {
-      const response = await axios.post(
-        `/upload-audio/${phrases.id}/`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      handleClick("Audio subido correctamente");
+    );
+
+    console.log("Audio uploaded successfully:", response.data);
+    handleClick("Audio subido correctamente");
+
     // Fetch a new phrase after successful upload
     setLoadingPhrases(true);
+    console.log("Fetching a new phrase...");
     axios
       .get("/random-phrase/", { withCredentials: true })
       .then((response) => {
-        console.log("Response:", response.data.phrase);
+        console.log("New phrase received:", response.data.phrase);
         setPhrases(response.data.phrase);
-        setCurrentPhraseIndex(response.data.done_phrases+1);
+        setCurrentPhraseIndex(response.data.done_phrases + 1);
         setTotalPhrases(response.data.total_phrases);
         setLoadingPhrases(false);
         setRecordedAudio(null);
-        waveSurferInstance.empty();
+        waveSurferInstance.empty(); // Reset WaveSurfer instance
       })
       .catch((error) => {
         console.error("Error fetching random phrase:", error);
         setLoadingPhrases(false);
       });
-    } catch (error) {
-      console.error("Error uploading audio:", error);
-      alert("Failed to upload audio.");
-    }
-  };
-  
+  } catch (error) {
+    console.error("Error uploading audio:", error);
+    alert("Failed to upload audio.");
+  }
+}; 
 
   const handleSpeakPhrase = () => {
     if ("speechSynthesis" in window) {

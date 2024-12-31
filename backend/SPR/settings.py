@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-@k#h+mryntk7s_jh5%a6k_26wpuww#m2!0pqfxi%alv7r3t4ck
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['speech-record.com']
 
 
 # Application definition
@@ -139,21 +139,22 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",  # Opcional si tienes archivos estáticos personalizados
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Add this line
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SITE_ID = 1
+SITE_ID = 2
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-LOGIN_REDIRECT_URL = 'http://localhost:3000/dashboard'  # Redirect after login
-LOGOUT_REDIRECT_URL = '/'  # Redirect after logout
+LOGIN_REDIRECT_URL = 'https://speech-record.com/dashboard'  # Redirect after login
+LOGOUT_REDIRECT_URL = 'https://speech-record.com'  # Redirect after logout
 
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -184,14 +185,21 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Dominio del cliente React en desarrollo
-    # "https://mi-frontend-produccion.com",  # Dominio del cliente en producción
+    #"http://localhost:3000",  # Dominio del cliente React en desarrollo
+    "https://speech-record.com",  # Dominio del cliente en producción
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',  # Add your frontend's URL
+    'https://speech-record.com',  # Add your frontend's URL
 ]
+
+CSRF_COOKIE_HTTPONLY = False  # To allow JS to read the cookie
+CSRF_COOKIE_SECURE = True  # Ensure this matches your HTTPS settings
+CSRF_USE_SESSIONS = False  # Keep cookies separate from sessions
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Media files
 #MEDIA_URL = '/media/'

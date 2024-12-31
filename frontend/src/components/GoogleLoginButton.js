@@ -5,7 +5,7 @@ import React from 'react';
 const GoogleLoginButton = () => {
     const handleGoogleLogin = () => {
         // Redirect the user to the Django Backend for login
-        const backendLoginUrl = 'http://localhost:8000/accounts/google/login/';
+        const backendLoginUrl = 'https://speech-record.com:543/accounts/google/login/';
         window.location.href = backendLoginUrl;
     };
 

@@ -115,7 +115,7 @@ const NewPhrase = ({
                                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                         {phrase.done && (
                                             <audio controls sx={{ marginTop: 2 }}>
-                                                <source src={`http://localhost:8000/api/audio/${phrase.id}/`} type="audio/mpeg" />
+                                                <source src={`https://speech-record.com:543/api/audio/${phrase.id}/`} type="audio/mpeg" />
                                                 Your browser does not support the audio element.
                                             </audio>
                                         )}
